@@ -4,9 +4,42 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="stylesheet.css">
-    <title>HeatMap project</title>
+    <title id="title">HeatMap project</title>
 </head>
 <body>
-    <div class="heading">Heatmap</div>
+ <div class="heading">Heatmap</div>
+    <div class="svg-target"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+      <script>
+        const w=window.innerWidth -50;
+        const h=window.innerHeight - 200;
+
+        const svg=d3.select("body")
+        .select("div.svg-target")
+        .append("svg")
+         .attr("id","heat-map")
+        .attr("width",w)
+        .attr("height",h)
+        .attr("background","blue");
+        
+
+        fetch('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json')
+        .then(response=>response.json())
+        .then(data=>{
+        dataFile = JSON.stringify(data);
+
+        d3.select("body")
+        .append("div")
+        .html(dataFile)
+
+
+
+        });
+    </script>
+
+   
+  
 </body>
 </html>
