@@ -27,6 +27,21 @@
       .attr("height", h)
       .attr("background", "yellow");
 
+      const legend = d3.select("body")
+      .select("div.svg-target")
+      .append("svg")
+      .attr("id", "legend")
+      .attr("width", w)
+      .attr("height",80)
+    
+    const tempColours=[
+      {"temp":9,"color":"red"},
+      {"temp":8,"color":"orange"},
+      {"temp":6,"color":"yellow"},
+      {"temp":3,"color":"green"}
+
+    ]
+
       const rectWidth = w / 262;
         const rectHeight = h / 12;
 
@@ -35,18 +50,12 @@
         }
 
         const tempColor=(temp)=>{
-          switch (true){
-            case (temp>9):return "red";
-            break;
-            case (temp>8):return "orange";
-            break;
-            case (temp>6):return "yellow";
-            break;
-            case (temp>3):return "green";
-            break;
-            default:return "blue";
-            break;
+         for(let f=0;f<tempColours.length;f++){
+          if(temp>tempColours[f].temp){
+            return tempColours[f].color;
           }
+         }
+         return "white";
         };
 
    //set up tooltip (got help online with the tooltip as dif from the <title> example in the course.)
@@ -89,6 +98,11 @@
           .attr("x", w / 2)
           .attr("y", h - padding + 50)
           .text("Year");
+
+        //  const lengendScale = d3.ScaleLinear()
+        //  .domain([d3.min(actData, (d) => parseYear(d.year)), d3.max(actData, (d) => parseYear(d.year))])
+        //  .range([padding, w - padding]);
+
 
 
 
@@ -154,7 +168,7 @@
 
         d3.select("body")
           .append("div")
-          .html(dataFile)
+          .html(tempColours[0].temp)
 
 
 
