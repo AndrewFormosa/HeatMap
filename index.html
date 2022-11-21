@@ -1,45 +1,168 @@
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="stylesheet.css">
-    <title id="title">HeatMap project</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="stylesheet.css">
+  <title id="title">HeatMap project</title>
 </head>
+
 <body>
- <div class="heading">Heatmap</div>
-    <div class="svg-target"></div>
+  <div class="heading">Heatmap</div>
+  <div class="description" id="description">Heatmap</div>
+  <div class="svg-target"></div>
 
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
-      <script>
-        const w=window.innerWidth -50;
-        const h=window.innerHeight - 200;
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+  <script>
+    const w = window.innerWidth - 50;
+    const h = window.innerHeight - 200;
+    const padding = 80;
+    const svg = d3.select("body")
+      .select("div.svg-target")
+      .append("svg")
+      .attr("id", "heat-map")
+      .attr("width", w)
+      .attr("height", h)
+      .attr("background", "yellow");
 
-        const svg=d3.select("body")
-        .select("div.svg-target")
-        .append("svg")
-         .attr("id","heat-map")
-        .attr("width",w)
-        .attr("height",h)
-        .attr("background","blue");
-        
+      const rectWidth = w / 262;
+        const rectHeight = h / 12;
 
-        fetch('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json')
-        .then(response=>response.json())
-        .then(data=>{
+        const roundToOneDP=(num)=>{
+          return ((Math.floor(num*10))/10);
+        }
+
+        const tempColor=(temp)=>{
+          switch (true){
+            case (temp>9):return "red";
+            break;
+            case (temp>8):return "orange";
+            break;
+            case (temp>6):return "yellow";
+            break;
+            case (temp>3):return "green";
+            break;
+            default:return "blue";
+            break;
+          }
+        };
+
+   //set up tooltip (got help online with the tooltip as dif from the <title> example in the course.)
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .attr("id", "tooltip")
+
+
+    fetch('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json')
+      .then(response => response.json())
+      .then(data => {
         dataFile = JSON.stringify(data);
+        const actData = data.monthlyVariance;
+        newDataFile = JSON.stringify(actData);
+
+        const baseTemp=data.baseTemperature; 
+    
+
+
+        //set xScale
+        let parseMonth = d3.timeParse("%B");
+        let parseYear = d3.timeParse("%Y"); //ensure that data.year is formated as a year for d3
+        const xScale = d3.scaleTime()
+          .domain([d3.min(actData, (d) => parseYear(d.year)), d3.max(actData, (d) => parseYear(d.year))])
+          .range([padding, w - padding]);
+        //set up xAxis
+        const xAxis = d3.axisBottom(xScale)
+        // .tickPadding(10)
+        // .tickSize(-h + 200);
+        svg.append("g")
+          .attr("id", "x-axis")
+          .attr("transform", "translate(0," + (h - padding+(rectHeight/2)) + ")")
+          .attr("id", "x-axis")
+          .call(xAxis);
+        //x-axis title
+        svg.append("text")
+          .attr("text-anchor", "middle")
+          .attr("x", w / 2)
+          .attr("y", h - padding + 50)
+          .text("Year");
+
+
+
+        //set yScale    
+        let parseTime = d3.timeParse("%m");
+        const yScale = d3.scaleTime()
+          .domain([parseTime(d3.min(actData, (d) => (d.month))), parseTime(d3.max(actData, (d) => (d.month)))])
+          .range([padding, h - padding]);
+        //set up yAxis
+        const yAxis = d3.axisLeft(yScale)
+          .tickFormat(d3.timeFormat("%B"))
+        //  .tickPadding(10)
+        // .tickSize(-w + padding + 100); //sets the format of the axis ticks
+        svg.append("g")
+          .attr("id", "y-axis")
+          .attr("transform", "translate(" + padding + "," + 0 + ")")
+          .attr("id", "y-axis")
+          .call(yAxis);
+        //y-axis title         
+        svg.append("text")
+          .attr("text-anchor", "middle")
+          .attr("x", -h / 2)
+          .attr("y", padding - 50)
+          .attr("transform", "rotate(-90)")
+          .text("Month");
+
+        //create bars from rect elements
+        svg.selectAll("rect")
+          .data(actData)
+          .enter()
+          .append("rect")
+         .attr("x", (d) => xScale(new Date(d.year,0)))  //SCALES CALC
+         .attr("data-year",(d)=>d.year)
+         .attr("data-month",(d)=>d.month-1)
+         .attr("data-temp",(d)=>baseTemp+ d.variance)
+        // .attr("x", (d) =>xScale(d.year))  //SCALES CALC
+          .attr("y", (d) => yScale(new Date(0,d.month-1))-rectHeight/2)
+          //.attr("y", (d) => ((d.month)*rectHeight))
+          .attr("width", (d) => (rectWidth))
+          .attr("height", (d) => (rectHeight))
+          .attr("fill",(d)=> tempColor(baseTemp+d.variance))
+          .attr("class", "cell")
+          .on("mouseover", function (event, d) {
+            tooltip
+              .transition()
+              .duration(200)
+              .style("opacity", 0.9);
+            tooltip
+              .html( d3.timeFormat("%B")(new Date(0,d.month)) +" " + (d.year) + "</b></br>" + roundToOneDP(baseTemp+ d.variance)+" deg C")
+              .style("position", "absolute")
+              .style("left", event.clientX + 20 + "px")
+              .style("top", event.clientY + 20 + "px");
+            tooltip
+            .attr("data-year",(d.year));
+          })
+          .on("mouseout", function (event, d) {
+            tooltip
+              .transition()
+              .style("opacity", 0);})
+
+
+
 
         d3.select("body")
-        .append("div")
-        .html(dataFile)
+          .append("div")
+          .html(dataFile)
 
 
 
-        });
-    </script>
+      });
+  </script>
 
-   
-  
+
+
 </body>
+
 </html>
