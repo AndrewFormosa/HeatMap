@@ -32,13 +32,19 @@
       .append("svg")
       .attr("id", "legend")
       .attr("width", w)
-      .attr("height",80)
+      .attr("height",300)
     
     const tempColours=[
-      {"temp":9,"color":"red"},
+    {"temp":12,"color":"darkerred"},
+    {"temp":11,"color":"darkred"},
+      {"temp":10,"color":"red"},
+      {"temp":9,"color":"darkorange"},
       {"temp":8,"color":"orange"},
-      {"temp":6,"color":"yellow"},
-      {"temp":3,"color":"green"}
+      {"temp":7,"color":"yellow"},
+      {"temp":6,"color":"white"},
+      {"temp":5,"color":"lightblue"},
+      {"temp":4,"color":"blue"},
+      {"temp":3,"color":"darkblue"}
 
     ]
 
@@ -111,7 +117,6 @@
         const yScale = d3.scaleTime()
           .domain([parseTime(d3.min(actData, (d) => (d.month))), parseTime(d3.max(actData, (d) => (d.month)))])
           .range([padding, h - padding]);
-        //set up yAxis
         const yAxis = d3.axisLeft(yScale)
           .tickFormat(d3.timeFormat("%B"))
         //  .tickPadding(10)
@@ -163,6 +168,41 @@
               .transition()
               .style("opacity", 0);})
 
+            //LEGEND
+            //legend Axis and Scale
+              const legendScale = d3.scaleLinear()
+         .domain([d3.min(tempColours, (d) => d.temp), d3.max(tempColours, (d) => d.temp+1)])
+        //.domain(0,10)
+          .range([padding, w - padding]);
+        //set up xAxis
+        const legendAxis = d3.axisBottom(legendScale)
+        .tickValues(tempColours.map((d)=>d.temp))
+        // .tickPadding(10)
+        // .tickSize(-h + 200);
+        legend.append("g")
+          .attr("id", "legend-axis")
+         .attr("transform", "translate(0,"+padding+")")
+          .call(legendAxis);
+        //x-axis title
+        legend.append("text")
+          .attr("text-anchor", "middle")
+          .attr("x", w / 2)
+          .attr("y", padding + 50)
+          .text("Temperure");
+          
+        
+          legend.selectAll("rect")
+          .data(tempColours)
+          .enter()
+          .append("rect")
+         .attr("x", (d) => legendScale(d.temp))  //SCALES CALC
+        //  .attr("y", (d) => yScale(new Date(0,d.month-1))-rectHeight/2)
+          .attr("y", (d) => ((50)))
+          //.attr("width", (d) => (w/(d3.max(tempColours.temp)-d3.min(tempColours.temp))))
+          .attr("width", (d) => (w/11))
+          .attr("height", (d) => 30)
+          .attr("fill",((d)=>d.color))
+        //  .attr("class", "cell")
 
 
 
