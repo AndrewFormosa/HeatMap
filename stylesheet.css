@@ -1,9 +1,16 @@
+:root {
+    --main-bg-color:rgb(108, 108, 108);
+    --heading-font-color:rgb(255, 255, 255);
+    --other-font-color:rgb(205, 205, 205);
+  }
+
 
 body{
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
     display:flex;
     flex-direction: column;
- align-items: center;
-    background: grey;
+    align-items: center;
+    background:var(--main-bg-color);
     height:100vh;
 }
 
@@ -11,13 +18,22 @@ body{
     font-size: 2rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
-    color:blue;
+    color:var(--heading-font-color)
 }
 
-#heat-map{
-    background:yellow;
+svg{
+    color:var(--other-font-color);
 }
-#legend{
-    background:green;
+
+.axis-heading{
+    fill:var(--heading-font-color);
+}
+
+.description{
+    color:var(--other-font-color);
+}
+
+.footer{
+    color:var(--other-font-color);
+    font-size: 0.8rem;
 }

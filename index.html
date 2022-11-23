@@ -9,62 +9,60 @@
 </head>
 
 <body>
-  <div class="heading">Heatmap</div>
-  <div class="description" id="description">Heatmap</div>
+  <div class="heading">Monthly Global Land-Surface Temperature</div>
+  <div class="description" id="description">1753 - 2015: base temperature 8.66℃</div>
   <div class="svg-target"></div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
   <script>
     const w = window.innerWidth - 50;
-    const h = window.innerHeight - 200;
+    const h = window.innerHeight - 300;
     const padding = 80;
     const svg = d3.select("body")
       .select("div.svg-target")
       .append("svg")
       .attr("id", "heat-map")
       .attr("width", w)
-      .attr("height", h)
-      .attr("background", "yellow");
+      .attr("height", h);
 
-      const legend = d3.select("body")
+    const legend = d3.select("body")
       .select("div.svg-target")
       .append("svg")
       .attr("id", "legend")
       .attr("width", w)
-      .attr("height",300)
-    
-    const tempColours=[
-    {"temp":12,"color":"darkerred"},
-    {"temp":11,"color":"darkred"},
-      {"temp":10,"color":"red"},
-      {"temp":9,"color":"darkorange"},
-      {"temp":8,"color":"orange"},
-      {"temp":7,"color":"yellow"},
-      {"temp":6,"color":"white"},
-      {"temp":5,"color":"lightblue"},
-      {"temp":4,"color":"blue"},
-      {"temp":3,"color":"darkblue"}
+      .attr("height", 170)
 
+    const tempColours = [
+      { "temp": 12, "color": "darkred" },
+      { "temp": 11, "color": "red" },
+      { "temp": 10, "color": "darkorange" },
+      { "temp": 9, "color": "orange" },
+      { "temp": 8, "color": "gold" },
+      { "temp": 7, "color": "yellow" },
+      { "temp": 6, "color": "white" },
+      { "temp": 5, "color": "lightblue" },
+      { "temp": 4, "color": "blue" },
+      { "temp": 3, "color": "darkblue" }
     ]
 
-      const rectWidth = w / 262;
-        const rectHeight = h / 12;
+    const rectWidth = w / 262;
+    const rectHeight = h / 12;
 
-        const roundToOneDP=(num)=>{
-          return ((Math.floor(num*10))/10);
+    const roundToOneDP = (num) => {
+      return ((Math.floor(num * 10)) / 10);
+    }
+
+    const tempColor = (temp) => {
+      for (let f = 0; f < tempColours.length; f++) {
+        if (temp > tempColours[f].temp) {
+          return tempColours[f].color;
         }
+      }
+      return "white";
+    };
 
-        const tempColor=(temp)=>{
-         for(let f=0;f<tempColours.length;f++){
-          if(temp>tempColours[f].temp){
-            return tempColours[f].color;
-          }
-         }
-         return "white";
-        };
-
-   //set up tooltip (got help online with the tooltip as dif from the <title> example in the course.)
+    //set up tooltip (got help online with the tooltip as dif from the <title> example in the course.)
     const tooltip = d3
       .select("body")
       .append("div")
@@ -79,8 +77,8 @@
         const actData = data.monthlyVariance;
         newDataFile = JSON.stringify(actData);
 
-        const baseTemp=data.baseTemperature; 
-    
+        const baseTemp = data.baseTemperature;
+
 
 
         //set xScale
@@ -95,14 +93,15 @@
         // .tickSize(-h + 200);
         svg.append("g")
           .attr("id", "x-axis")
-          .attr("transform", "translate(0," + (h - padding+(rectHeight/2)) + ")")
+          .attr("transform", "translate(0," + (h - padding + (rectHeight / 2)) + ")")
           .attr("id", "x-axis")
           .call(xAxis);
         //x-axis title
         svg.append("text")
+        .attr("class","axis-heading")
           .attr("text-anchor", "middle")
           .attr("x", w / 2)
-          .attr("y", h - padding + 50)
+          .attr("y", h - padding + 70)
           .text("Year");
 
         //  const lengendScale = d3.ScaleLinear()
@@ -128,27 +127,29 @@
           .call(yAxis);
         //y-axis title         
         svg.append("text")
+          .attr("class","axis-heading")
           .attr("text-anchor", "middle")
           .attr("x", -h / 2)
           .attr("y", padding - 50)
           .attr("transform", "rotate(-90)")
           .text("Month");
+         
 
         //create bars from rect elements
         svg.selectAll("rect")
           .data(actData)
           .enter()
           .append("rect")
-         .attr("x", (d) => xScale(new Date(d.year,0)))  //SCALES CALC
-         .attr("data-year",(d)=>d.year)
-         .attr("data-month",(d)=>d.month-1)
-         .attr("data-temp",(d)=>baseTemp+ d.variance)
-        // .attr("x", (d) =>xScale(d.year))  //SCALES CALC
-          .attr("y", (d) => yScale(new Date(0,d.month-1))-rectHeight/2)
+          .attr("x", (d) => xScale(new Date(d.year, 0)))  //SCALES CALC
+          .attr("data-year", (d) => d.year)
+          .attr("data-month", (d) => d.month - 1)
+          .attr("data-temp", (d) => baseTemp + d.variance)
+          // .attr("x", (d) =>xScale(d.year))  //SCALES CALC
+          .attr("y", (d) => yScale(new Date(0, d.month - 1)) - rectHeight / 2)
           //.attr("y", (d) => ((d.month)*rectHeight))
           .attr("width", (d) => (rectWidth))
           .attr("height", (d) => (rectHeight))
-          .attr("fill",(d)=> tempColor(baseTemp+d.variance))
+          .attr("fill", (d) => tempColor(baseTemp + d.variance))
           .attr("class", "cell")
           .on("mouseover", function (event, d) {
             tooltip
@@ -156,66 +157,62 @@
               .duration(200)
               .style("opacity", 0.9);
             tooltip
-              .html( d3.timeFormat("%B")(new Date(0,d.month)) +" " + (d.year) + "</b></br>" + roundToOneDP(baseTemp+ d.variance)+" deg C")
+              .html(d3.timeFormat("%B")(new Date(0, d.month)) + " " + (d.year) + "</b></br>" + roundToOneDP(baseTemp + d.variance) + "<span>&#176;</span>C")
               .style("position", "absolute")
               .style("left", event.clientX + 20 + "px")
               .style("top", event.clientY + 20 + "px");
             tooltip
-            .attr("data-year",(d.year));
+              .attr("data-year", (d.year));
           })
           .on("mouseout", function (event, d) {
             tooltip
               .transition()
-              .style("opacity", 0);})
+              .style("opacity", 0);
+          })
 
-            //LEGEND
-            //legend Axis and Scale
-              const legendScale = d3.scaleLinear()
-         .domain([d3.min(tempColours, (d) => d.temp), d3.max(tempColours, (d) => d.temp+1)])
-        //.domain(0,10)
+        //LEGEND
+        //legend Axis and Scale
+        const legendScale = d3.scaleLinear()
+          .domain([d3.min(tempColours, (d) => d.temp), d3.max(tempColours, (d) => d.temp + 1)])
+          //.domain(0,10)
           .range([padding, w - padding]);
         //set up xAxis
         const legendAxis = d3.axisBottom(legendScale)
-        .tickValues(tempColours.map((d)=>d.temp))
+          .tickValues(tempColours.map((d) => d.temp))
         // .tickPadding(10)
         // .tickSize(-h + 200);
         legend.append("g")
           .attr("id", "legend-axis")
-         .attr("transform", "translate(0,"+padding+")")
+          .attr("transform", "translate(0," + padding + ")")
           .call(legendAxis);
         //x-axis title
         legend.append("text")
           .attr("text-anchor", "middle")
           .attr("x", w / 2)
           .attr("y", padding + 50)
-          .text("Temperure");
-          
-        
-          legend.selectAll("rect")
+          .attr("class","axis-heading")
+          .text("Temperature degrees-C");
+
+
+        legend.selectAll("rect")
           .data(tempColours)
           .enter()
           .append("rect")
-         .attr("x", (d) => legendScale(d.temp))  //SCALES CALC
-        //  .attr("y", (d) => yScale(new Date(0,d.month-1))-rectHeight/2)
+          .attr("x", (d) => legendScale(d.temp))  //SCALES CALC
+          //  .attr("y", (d) => yScale(new Date(0,d.month-1))-rectHeight/2)
           .attr("y", (d) => ((50)))
           //.attr("width", (d) => (w/(d3.max(tempColours.temp)-d3.min(tempColours.temp))))
-          .attr("width", (d) => (w/11))
+          .attr("width", (d) => (w-2*padding)/10)
           .attr("height", (d) => 30)
-          .attr("fill",((d)=>d.color))
+          .attr("fill", ((d) => d.color))
         //  .attr("class", "cell")
-
-
-
-        d3.select("body")
-          .append("div")
-          .html(tempColours[0].temp)
 
 
 
       });
   </script>
 
-
+<div class="footer">Heat-Map freeCodeCamp project by Andrew Formosa</div>
 
 </body>
 
